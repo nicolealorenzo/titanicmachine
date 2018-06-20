@@ -13,103 +13,101 @@ from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 import sklearn.metrics
 
-#import and uderstand the data
+# import and view the data
 train_url = "http://s3.amazonaws.com/assets.datacamp.com/course/Kaggle/train.csv"
 train = pd.read_csv(train_url)
-
 test_url = "http://s3.amazonaws.com/assets.datacamp.com/course/Kaggle/test.csv"
 test = pd.read_csv(test_url)
 train.head()
 test.head()
 
-# Passengers that survived vs passengers that passed away
+# passengers that survived vs passengers that passed away
 print(train["Survived"].value_counts())
 
-# As proportions
+# as percent
 print(train["Survived"].value_counts(normalize = True))
 
-# Males that survived vs males that passed away
+# compare male survivors vs died
 print(train["Survived"][train["Sex"] == 'male'].value_counts())
 
-# Females that survived vs Females that passed away
+# compare female survivors vs died
 print(train["Survived"][train["Sex"] == 'female'].value_counts())
 
-# Normalized male survival
+# normalize male "Survived" data
 print(train["Survived"][train["Sex"] == 'male'].value_counts(normalize = True))
 
-# Normalized female survival
+# normalize female "Survived" data
 print(train["Survived"][train["Sex"] == 'female'].value_counts(normalize = True))
 
-# Create the column Child and assign to 'NaN'
+# create the column Child and assign to 'NaN'
 train["Child"] = float('NaN')
 
-# Assign 1 to passengers under 18, 0 to those 18 or older. Print the new column.
+# assign 1 to passengers under 18, 0 to those 18 or older. Print the new column.
 train["Child"][train["Age"]<18] = 1
 train["Child"][train["Age"]>=18] = 0
 print(train["Child"])
 
-# Print normalized Survival Rates for passengers under 18
+# compare age with death and survival >18
 print(train["Survived"][train["Child"] == 1].value_counts(normalize = True))
 
-# Print normalized Survival Rates for passengers 18 or older
+# compare age with death and survival =< 18
 print(train["Survived"][train["Child"] == 0].value_counts(normalize = True))
 
-# Create a copy of test: test_one
+# copy test
 test_one = test
 
-# Initialize a Survived column to 0
+# make all general 'Surrvived' 0 
 test_one["Survived"] = 0
 
-# Set Survived to 1 if Sex equals "female" and print the `Survived` column from `test_one`
+# the 0 changes to a 1. Sex being the main factor
+# set Survived to 1 if Sex equals "female" and print the `Survived` column from `test_one`
 test_one["Survived"][test["Sex"] == 'female'] = 1
 test_one["Survived"][test["Sex"] == 'male'] = 0
 print(test_one["Survived"])
 
-# Impute the Embarked variable
+# change strings into ints so that the data can be manipulated
 train["Embarked"] = train["Embarked"].fillna("S")
 # Convert the Embarked classes to integer form
 train["Embarked"][train["Embarked"] == "S"] = 0
 train["Embarked"][train["Embarked"] == "C"] = 1
 train["Embarked"][train["Embarked"] == "Q"] = 2
 
-# Print the Sex and Embarked columns
+# view Sex and Embarked columns
 print(train["Sex"])
 print(train["Embarked"])
 
-# Print the train data to see the available features
+# print the train data to see the available features
 print(train)
 
-# Create the target and features numpy arrays: target, features_one
+# create the target and features numpy arrays: target, features_one
 target = train["Survived"].values
 features_one = train[["Pclass", "Sex", "Age", "Fare"]].values
-
 print(features_one)
 
-# Fit your first decision tree: my_tree_one
+# fit your first decision tree: my_tree_one
 #my_tree_one = tree.DecisionTreeClassifier()
 #my_tree_one = my_tree_one.fit(features_one, target)
 
-# Look at the importance and score of the included features
+# see what factors play the biggest role on "Survival"
 print(my_tree_one.feature_importances_)
 print(my_tree_one.score(features_one, target))
 
-# Impute the missing value with the median
+# any NaN values replace with median
 test.Fare[152] = test.Fare.median()
 
-# Extract the features from the test set: Pclass, Sex, Age, and Fare.
+# extract the features from the test set: Pclass, Sex, Age, and Fare.
 test_features = test[["Pclass", "Sex", "Age", "Fare"]].values
 
-# Make your prediction using the test set and print them.
+# make prediction using the test set and print them.
 my_prediction = my_tree_one.predict(test_features)
 print(my_prediction)
 
-# Create a data frame with two columns: PassengerId & Survived. Survived contains your predictions
+# create a data frame with two columns: PassengerId & Survived. 
+# survived contains your predictions
 PassengerId =np.array(test["PassengerId"]).astype(int)
 my_solution = pd.DataFrame(my_prediction, PassengerId, columns = ["Survived"])
 print(my_solution)
 
-# Check that your data frame has 418 entries
-print(my_solution.shape)
 
-# Write your solution to a csv file with the name my_solution.csv
+# save solution to a csv file
 my_solution.to_csv("my_solution_one.csv", index_label = ["PassengerId"])
